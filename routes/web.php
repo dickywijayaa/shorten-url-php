@@ -16,6 +16,6 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix' => 'shorten'], function () use ($router) {
-    $router->get('/{shortcode}', 'ShortenController@getTotalOrderAndShipping');
+    $router->get('/{shortcode}', 'ShortenController@GetURLFromShortcode');
     $router->post('/', 'ShortenController@postShorten');
 });
