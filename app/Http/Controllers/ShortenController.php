@@ -19,18 +19,124 @@ class ShortenController extends Controller
         $this->service = new ShortenService;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/shorten/{shortcode}",
+     *     operationId="GetURLFromShortcode",
+     *     description="Endpoint to redirect to url from shortcode",
+     *     tags={"Shorten"},
+     *     @OA\Parameter(
+     *         in="path",
+     *         name="shortcode",
+     *         description="Shortcode to be search.",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string",
+     *             example="awXy12"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response=302,
+     *          description="Will redirect to url if exists"
+     *     ),
+     *     @OA\Response(
+     *          response="400",
+     *          description="Bad Request.",
+     *          @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="shortcode is not found"
+     *             )
+     *          )
+     *     ),
+     * )
+     */
     public function GetURLFromShortcode($shortcode) {
         $result = $this->service->FetchURLByCode($shortcode);
         
         if (!$result['status']) {
-            return response()->json([
-                'message'=> 'shortcode is not found.'
-            ], HTTPStatus::HTTP_NOT_FOUND);
+            $result['message'] = 'shortcode is not found.';
+            return response()->json($result, HTTPStatus::HTTP_NOT_FOUND);
         }
 
         return redirect($result['data']->url);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/shorten/",
+     *     operationId="PostShortcode",
+     *     description="Endpoint to store url and shortcode",
+     *     tags={"Shorten"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="url",
+     *                 type="string",
+     *                 example="https://dickywijayaa.com"
+     *             ),
+     *             @OA\Property(
+     *                 property="shortcode",
+     *                 type="string",
+     *                 example="AWX123"
+     *             )
+     *          ),
+     *     ),
+     *     @OA\Response(
+     *          response=200,
+     *          description="success, return url and shortcode",
+     *          @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="to-do"
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="url",
+     *                     type="string"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="shortcode",
+     *                     type="string"
+     *                 )
+     *             ),
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             )
+     *          )
+     *     ),
+     *     @OA\Response(
+     *          response="400",
+     *          description="Bad Request.",
+     *          @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="missing required url parameter."
+     *             )
+     *          )
+     *     ),
+     *     @OA\Response(
+     *          response="422",
+     *          description="Unprocessable Entity.",
+     *          @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="failed insert url."
+     *             )
+     *          )
+     *     ),
+     *
+     * )
+     */
     public function PostShorten(Request $request) {
         $params = $request->all();
         
